@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTabNavigation();
     loadGlobalPrompts();
     initFreeCreate();
+    initSubtitleHelper();
     setupProjectPathAutoFill();
     fetchDefaultTTSConfig();
 });
@@ -362,6 +363,10 @@ function setupTabNavigation() {
             if (tabId === 'prompts') {
                 loadGlobalPrompts();
             }
+
+            if (tabId === 'subtitle') {
+                initSubtitleHelper();
+            }
         });
     });
 }
@@ -381,6 +386,85 @@ function setupImageGenerationTabs() {
             document.getElementById(subTabId + 'SubTab').classList.add('active');
         });
     });
+}
+
+// ==================== 字幕提取 ====================
+function initSubtitleHelper() {
+    const input = document.getElementById('subtitleVideoUrl');
+    if (input && input.dataset.bound !== 'true') {
+        input.addEventListener('input', updateSubtitleCommandPreview);
+        input.dataset.bound = 'true';
+    }
+
+    updateSubtitleCommandPreview();
+    loadSubtitleJavaCode();
+}
+
+function normalizeSubtitleUrl(raw) {
+    if (!raw) return 'BV1xx411c7mD';
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('BV')) {
+        return `https://www.bilibili.com/video/${trimmed}`;
+    }
+    return trimmed;
+}
+
+function updateSubtitleCommandPreview() {
+    const commandBlock = document.getElementById('subtitleCommandPreview');
+    if (!commandBlock) return;
+
+    const input = document.getElementById('subtitleVideoUrl');
+    const normalized = normalizeSubtitleUrl(input ? input.value : '');
+    const command = `mvn -Dexec.mainClass="com.example.subtitle.BilibiliSubtitleFetcher" -Dexec.args=\"${normalized} true\" exec:java`;
+    commandBlock.textContent = command;
+}
+
+async function copySubtitleCommand() {
+    const commandBlock = document.getElementById('subtitleCommandPreview');
+    if (!commandBlock) return;
+
+    try {
+        await navigator.clipboard.writeText(commandBlock.textContent);
+        showToast('运行命令已复制');
+    } catch (error) {
+        console.error('复制命令失败:', error);
+        showToast('复制命令失败');
+    }
+}
+
+async function loadSubtitleJavaCode(force = false) {
+    const codeBlock = document.getElementById('subtitleJavaCode');
+    if (!codeBlock) return;
+
+    if (!force && codeBlock.dataset.loaded === 'true') {
+        return;
+    }
+
+    try {
+        const response = await fetch('/java/BilibiliSubtitleFetcher.java');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const text = await response.text();
+        codeBlock.textContent = text;
+        codeBlock.dataset.loaded = 'true';
+    } catch (error) {
+        console.error('加载Java代码失败:', error);
+        codeBlock.textContent = '加载Java代码失败，请检查服务器是否可访问 /java/BilibiliSubtitleFetcher.java';
+    }
+}
+
+async function copySubtitleJavaCode() {
+    const codeBlock = document.getElementById('subtitleJavaCode');
+    if (!codeBlock) return;
+
+    try {
+        await navigator.clipboard.writeText(codeBlock.textContent);
+        showToast('Java代码已复制');
+    } catch (error) {
+        console.error('复制Java代码失败:', error);
+        showToast('复制失败');
+    }
 }
 
 // ==================== 文案生成功能 ====================

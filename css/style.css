@@ -1497,6 +1497,55 @@ textarea.input-field {
     font-size: 0.85rem;
 }
 
+/* 字幕提取 */
+.subtitle-helper-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.subtitle-command,
+.subtitle-notes {
+    margin-top: 1rem;
+}
+
+.code-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.code-block {
+    background: #0f0f0f;
+    color: #e3e3e3;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.subtitle-notes ul {
+    margin-left: 1.25rem;
+    color: var(--text-secondary);
+}
+
+.subtitle-notes li {
+    margin-bottom: 0.35rem;
+}
+
+@media (max-width: 1100px) {
+    .subtitle-helper-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* 响应式布局 */
 @media (max-width: 1200px) {
     .free-create-layout {
