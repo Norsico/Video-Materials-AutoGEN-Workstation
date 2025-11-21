@@ -48,6 +48,7 @@
             
             <div class="tabs">
                 <button class="tab-btn active" data-tab="copywriting">文案生成</button>
+                <button class="tab-btn" data-tab="subtitle">字幕提取</button>
                 <button class="tab-btn" data-tab="tts">TTS合成</button>
                 <button class="tab-btn" data-tab="imageGeneration">图片生成</button>
                 <button class="tab-btn" data-tab="prompts">常用提示词</button>
@@ -103,7 +104,62 @@
                         <p>正在生成文案...</p>
                     </div>
                 </div>
-                
+
+                <!-- 字幕提取 Tab -->
+                <div id="subtitleTab" class="tab-pane">
+                    <div class="card">
+                        <div class="card-header-with-btn">
+                            <div>
+                                <h3>字幕提取（Java版）</h3>
+                                <p class="hint">参考 get_bilibili_subtitle.py 的逆向接口，用 Java + Playwright 实现并可直接复制。</p>
+                            </div>
+                            <button class="btn-secondary" onclick="copySubtitleJavaCode()">复制Java代码</button>
+                        </div>
+
+                        <div class="subtitle-helper-grid">
+                            <div>
+                                <div class="input-group">
+                                    <label for="subtitleVideoUrl">B站链接或BV号 *</label>
+                                    <input
+                                        type="text"
+                                        id="subtitleVideoUrl"
+                                        placeholder="例如：https://www.bilibili.com/video/BVxxxxxxxxx 或 BVxxxxxxx"
+                                        class="input-field"
+                                    >
+                                </div>
+
+                                <div class="subtitle-command">
+                                    <div class="code-toolbar">
+                                        <div>
+                                            <h4>示例运行命令</h4>
+                                            <p class="hint">需要先通过 Maven 或 Gradle 引入 Playwright 与 Jackson 依赖。</p>
+                                        </div>
+                                        <button class="btn-secondary btn-small" onclick="copySubtitleCommand()">复制命令</button>
+                                    </div>
+                                    <pre class="code-block"><code id="subtitleCommandPreview"></code></pre>
+                                </div>
+
+                                <div class="subtitle-notes">
+                                    <h4>快速使用说明</h4>
+                                    <ul>
+                                        <li>创建 Maven 项目后添加 Playwright（<code>com.microsoft.playwright:playwright</code>）与 Jackson 依赖。</li>
+                                        <li>将 <code>BilibiliSubtitleFetcher.java</code> 放入合适的包路径（示例为 <code>com.example.subtitle</code>）。</li>
+                                        <li>运行时传入 BV 号或完整链接即可抓取字幕，默认会输出去除时间戳的纯文本。</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="code-toolbar">
+                                    <h4>Java 源码</h4>
+                                    <button class="btn-secondary btn-small" onclick="copySubtitleJavaCode()">复制代码</button>
+                                </div>
+                                <pre class="code-block"><code id="subtitleJavaCode">正在加载 Java 代码...</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TTS合成Tab -->
                 <div id="ttsTab" class="tab-pane">
                     <div class="card">
