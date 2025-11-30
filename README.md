@@ -21,7 +21,7 @@
 ![界面 5](img/5.png)
 ![界面 6](img/6.png)
 
-## 通过Docker 部署
+## 通过Docker 部署(目前有Bug)
 
 1. 复制配置：`cp env.example.yaml env.yaml`，填好各个 Key。容器内建议把 `Default-Project-Root` 设为 `/data/projects`（会被映射到本地 `./data` 目录，方便持久化）。
 2. 一键启动：`docker compose up -d --build`。首次会自动构建。
