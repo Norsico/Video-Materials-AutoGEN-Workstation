@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec, execFile } = require('child_process');
 const yaml = require('js-yaml');
+const twelvelabs = require('./twelvelabs');
 
 const PORT = 8765;
 
@@ -1218,6 +1219,78 @@ const server = http.createServer((req, res) => {
         
         return;
     }
+
+    // ============ TwelveLabs 集成（可选，未配置 Key 时不影响任何功能） ============
+
+    // 查询 TwelveLabs 是否已启用（前端可据此决定是否展示相关入口）
+    if (req.url === '/api/twelvelabs/status' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({
+            success: true,
+            enabled: twelvelabs.isEnabled(config),
+            pegasusModel: twelvelabs.PEGASUS_MODEL,
+            marengoModel: twelvelabs.MARENGO_MODEL
+        }));
+        return;
+    }
+
+    // Pegasus：理解参考视频/源视频，辅助文案与分镜策划
+    if (req.url === '/api/twelvelabs/analyze-video' && req.method === 'POST') {
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', async () => {
+            try {
+                const data = JSON.parse(body || '{}');
+                const { video, prompt, maxTokens } = data;
+
+                console.log('🎬 调用 Pegasus 分析视频...');
+                const text = await twelvelabs.analyzeVideo(config, { video, prompt, maxTokens });
+
+                res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({ success: true, data: text }));
+            } catch (error) {
+                console.error('❌ Pegasus 分析失败:', error);
+                res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({ success: false, message: `分析失败: ${error.message}` }));
+            }
+        });
+
+        return;
+    }
+
+    // Marengo：按查询对候选素材做相似度排序，辅助素材选择
+    if (req.url === '/api/twelvelabs/rank-materials' && req.method === 'POST') {
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', async () => {
+            try {
+                const data = JSON.parse(body || '{}');
+                const { query, candidates, topK } = data;
+
+                console.log('🔎 调用 Marengo 进行素材排序...');
+                const ranked = await twelvelabs.rankMaterials(config, { query, candidates, topK });
+
+                res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({ success: true, data: ranked }));
+            } catch (error) {
+                console.error('❌ Marengo 素材排序失败:', error);
+                res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({ success: false, message: `排序失败: ${error.message}` }));
+            }
+        });
+
+        return;
+    }
+
+    // ====================== TwelveLabs 集成结束 ======================
 
     // 处理路径
     let filePath = req.url === '/' ? '/index.html' : req.url;

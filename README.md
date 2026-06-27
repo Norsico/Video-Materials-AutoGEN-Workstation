@@ -54,6 +54,23 @@
 
 ### 其它功能我就懒得一个一个写了，具体有啥自己可以部署一下去玩，注意文案生成这里需要配合n8n来操作，之前写的n8n文件找不到了，所以这部分其实可以忽略，主要就是一个用于生成文案的脚本AI提示词以及我主页另一个仓库中有的一个开源的B站视频字幕提取器（当然网上也有）（参考别人高播放的视频自己学起来也会快很多）
 
+## TwelveLabs 视频理解集成（可选）
+
+为「素材策划 / 素材选择」环节接入了 [TwelveLabs](https://twelvelabs.io)，**完全按需启用，不配置则不影响任何现有功能**：
+
+- **Pegasus 视频理解**：理解一段参考视频/源视频的内容，输出文字描述，辅助文案与分镜策划。
+- **Marengo 多模态向量（512 维）**：把脚本与候选素材统一编码成向量，用余弦相似度为「素材选择」做排序，自动挑出最贴合脚本的素材。
+
+启用方法：在 `env.yaml` 中填写 `TwelveLabs-API-KEY`（免费额度可在 https://twelvelabs.io 申请）。新增接口：
+
+- `GET  /api/twelvelabs/status` —— 查询是否已启用
+- `POST /api/twelvelabs/analyze-video` —— Pegasus 分析视频，body：`{ "video": { "type": "url", "url": "..." }, "prompt": "...", "maxTokens": 1024 }`（`type` 可为 `url` / `asset_id` / `base64_string`；URL 上限 4GB，本地直传素材上限 200MB，视频时长需 ≥ 4 秒）
+- `POST /api/twelvelabs/rank-materials` —— Marengo 素材排序，body：`{ "query": "某条分镜脚本", "candidates": ["素材A 描述", "素材B 描述"], "topK": 3 }`
+
+测试：`npm test`（无网络单测始终执行；设置环境变量 `TWELVELABS_API_KEY` 后会额外跑在线契约测试）。
+
+> _Optional TwelveLabs integration: set `TwelveLabs-API-KEY` in `env.yaml` to enable Pegasus video understanding (for copy/storyboard planning) and Marengo 512-dim embeddings (to rank candidate materials by similarity). Fully opt-in — without a key, behavior is unchanged. Free tier at https://twelvelabs.io. Run `npm test`._
+
 ## 接下来如何好好利用这个项目还是得靠自己。
 ### 因为主要还是偏向管理用的（简单来讲就是功能不会有你想象的那么实用），视频内容如何定义，如何打造爆款还是需要动脑子。当然本项目里面使用图像编辑模型的是NanoBanana，本地部署的AIStudio的反向代理的接口，用来生图然后给Sora也是不错的，起码测试下来比较稳定。
 
